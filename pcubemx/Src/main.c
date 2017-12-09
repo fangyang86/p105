@@ -69,6 +69,7 @@ void StartDefaultTask(void const * argument);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
+void StartDefaultTaskLed(void const * argument);
 
 /* USER CODE END PFP */
 
@@ -125,6 +126,8 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
+  osThreadDef(defaultTaskLed, StartDefaultTaskLed, osPriorityNormal, 0, 128);
+  osThreadCreate(osThread(defaultTaskLed), NULL);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
@@ -210,13 +213,33 @@ void SystemClock_Config(void)
 static void MX_GPIO_Init(void)
 {
 
+  GPIO_InitTypeDef GPIO_InitStruct;
+
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0|GPIO_PIN_1, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : PB0 PB1 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
 
 /* USER CODE BEGIN 4 */
+void StartDefaultTaskLed(void const * argument)
+{
+  for(;;)
+  {
+	HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_0);      // led.bad
+	HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_1);  //led.green
+	osDelay(500);//ms
+  }
+}
 
 /* USER CODE END 4 */
 
